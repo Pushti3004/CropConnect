@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crop Connect MVP</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f8f5;color:#17324d}
+header{background:#1f6b4f;color:white;padding:18px 28px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-size:25px;font-weight:700}.tag{font-size:13px;opacity:.9}
+nav{background:white;padding:10px 24px;display:flex;gap:8px;border-bottom:1px solid #dce6df;flex-wrap:wrap}
+nav button,.btn{border:0;border-radius:10px;padding:10px 15px;background:#e8f2ed;color:#1f6b4f;font-weight:700;cursor:pointer}
+nav button.active,.btn.primary{background:#1f6b4f;color:white}
+main{max-width:1180px;margin:25px auto;padding:0 18px}
+.page{display:none}.page.active{display:block}
+h1{margin:5px 0 8px}.muted{color:#667785}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.card{background:white;border:1px solid #dce6df;border-radius:16px;padding:18px;box-shadow:0 3px 12px #17324d0d}
+.card h3{margin:0 0 8px}.stat{font-size:28px;font-weight:700;color:#1f6b4f}
+input,select{width:100%;padding:11px;border:1px solid #cbd8d1;border-radius:9px;margin:6px 0 12px}
+table{width:100%;border-collapse:collapse;background:white}.table-wrap{overflow:auto;border-radius:14px}
+th,td{padding:12px;border-bottom:1px solid #e5ece8;text-align:left}th{background:#edf5f0}
+.badge{padding:5px 9px;border-radius:20px;background:#e8f2ed;color:#1f6b4f;font-size:12px;font-weight:700}
+.flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:20px 0}.flow span{background:white;border:1px solid #cfe0d6;padding:12px 15px;border-radius:12px;font-weight:700}.arrow{color:#1f6b4f;font-weight:bold}
+.alert{padding:13px;border-radius:10px;background:#fff7df;margin:12px 0}.success{background:#e7f6ed;color:#17623e}
+.hidden{display:none}.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}@media(max-width:760px){.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="logo">🌾 Crop Connect</div><div class="tag">Direct Farm-to-Buyer Marketplace • MVP</div></header>
+<nav id="nav">
+<button class="active" onclick="show('dashboard',this)">Dashboard</button>
+<button onclick="show('farmer',this)">Farmer</button>
+<button onclick="show('buyer',this)">Buyer</button>
+<button onclick="show('supplier',this)">Supplier</button>
+<button onclick="show('orders',this)">Orders</button>
+<button onclick="show('tech',this)">Technical Flow</button>
+</nav>
+
+<main>
+<section id="dashboard" class="page active">
+<h1>Crop Connect MVP</h1><p class="muted">Connect → Match → Deliver → Settle</p>
+<div class="flow"><span>👩‍🌾 Farmer</span><b class="arrow">→</b><span>📱 Marketplace</span><b class="arrow">→</b><span>🛒 Buyer</span><b class="arrow">→</b><span>🚚 Supplier</span><b class="arrow">→</b><span>💳 Settlement</span></div>
+<div class="grid">
+<div class="card"><h3>Active Farmers</h3><div class="stat" id="farmerCount">12</div><p class="muted">Registered sellers</p></div>
+<div class="card"><h3>Crop Listings</h3><div class="stat" id="cropCount">6</div><p class="muted">Available now</p></div>
+<div class="card"><h3>Open Orders</h3><div class="stat" id="orderCount">3</div><p class="muted">Awaiting delivery</p></div>
+<div class="card"><h3>Avg. Settlement</h3><div class="stat">Same day</div><p class="muted">After delivery confirmation</p></div>
+</div>
+<div class="card" style="margin-top:18px"><h3>How the MVP works</h3><p>Farmers list crops → AI price guidance → buyers place orders → suppliers receive pickup requests → route is optimized → delivery is confirmed → payment is settled.</p></div>
+</section>
+
+<section id="farmer" class="page">
+<h1>Farmer Portal</h1><p class="muted">Create a crop listing and view price guidance.</p>
+<div class="two">
+<div class="card"><h3>➕ Add Crop Listing</h3>
+<label>Crop</label><input id="crop" placeholder="e.g. Tomato">
+<label>Quantity (kg)</label><input id="qty" type="number" placeholder="500">
+<label>Location</label><input id="loc" placeholder="Kherva">
+<label>Your expected price / kg</label><input id="price" type="number" placeholder="25">
+<button class="btn primary" onclick="addListing()">Publish Listing</button>
+<div id="listingMsg"></div></div>
+<div class="card"><h3>🤖 AI Fair Price Guidance</h3><p class="muted">Demo model using sample market data. In the full system this is served by Prophet + scikit-learn + FastAPI using Agmarknet data.</p>
+<div class="alert"><b>Suggested range:</b> ₹22–₹27 / kg</div>
+<button class="btn" onclick="alert('Demo: price guidance refreshed from market data.')">Refresh Price</button></div>
+</div>
+</section>
+
+<section id="buyer" class="page">
+<h1>Buyer Marketplace</h1><p class="muted">Browse farmer listings and place an order.</p>
+<div class="table-wrap"><table><thead><tr><th>Crop</th><th>Farmer</th><th>Qty</th><th>Price</th><th></th></tr></thead>
+<tbody id="cropTable"><tr><td>Tomato</td><td>Ravi Farms</td><td>500 kg</td><td>₹25/kg</td><td><button class="btn primary" onclick="placeOrder('Tomato')">Order</button></td></tr>
+<tr><td>Wheat</td><td>Green Field</td><td>1000 kg</td><td>₹31/kg</td><td><button class="btn primary" onclick="placeOrder('Wheat')">Order</button></td></tr>
+<tr><td>Onion</td><td>Patel Farms</td><td>700 kg</td><td>₹22/kg</td><td><button class="btn primary" onclick="placeOrder('Onion')">Order</button></td></tr></tbody></table></div>
+<div id="buyerMsg"></div>
+</section>
+
+<section id="supplier" class="page">
+<h1>Transport Supplier Portal</h1><p class="muted">Accept pickup requests and follow an optimized route.</p>
+<div class="grid">
+<div class="card"><h3>Pickup Request #CC1024</h3><p>📍 Farmer: Kherva</p><p>📍 Buyer: Mehsana</p><p>📦 Tomato • 300 kg</p><span class="badge">Route optimized</span><br><br><button class="btn primary" onclick="acceptPickup()">Accept Pickup</button></div>
+<div class="card"><h3>Route Engine</h3><p>Google Distance Matrix + OR-Tools VRP</p><div class="flow"><span>Farm A</span><b class="arrow">→</b><span>Farm B</span><b class="arrow">→</b><span>Buyer</span></div><button class="btn" onclick="alert('Demo route: Kherva → Visnagar → Mehsana')">View Route</button></div>
+</div><div id="supplierMsg"></div>
+</section>
+
+<section id="orders" class="page">
+<h1>Order Tracking</h1><p class="muted">Real-time-style MVP status flow.</p>
+<div class="card"><h3>Order #CC1024 — Tomato</h3>
+<div class="flow"><span>✓ Ordered</span><b class="arrow">→</b><span>✓ Pickup</span><b class="arrow">→</b><span id="transit">🚚 In Transit</span><b class="arrow">→</b><span id="del">Delivery</span><b class="arrow">→</b><span id="pay">Payment</span></div>
+<button class="btn primary" onclick="advanceOrder()">Advance Status</button>
+<div id="orderMsg"></div></div>
+</section>
+
+<section id="tech" class="page">
+<h1>Technical Flow</h1><p class="muted">Technology labels mapped to the user workflow.</p>
+<div class="grid">
+<div class="card"><h3>📱 Client</h3><p>Android • Kotlin • Jetpack Compose</p></div>
+<div class="card"><h3>🔐 Authentication</h3><p>Firebase Authentication / Phone OTP</p></div>
+<div class="card"><h3>⚙ Backend</h3><p>FastAPI • REST APIs</p></div>
+<div class="card"><h3>🗄 Database</h3><p>MongoDB Atlas • user, crop, order data</p></div>
+<div class="card"><h3>🤖 AI/ML</h3><p>Prophet + scikit-learn • Agmarknet market data</p></div>
+<div class="card"><h3>🗺 Logistics</h3><p>Google Distance Matrix + OR-Tools VRP</p></div>
+<div class="card"><h3>💳 Payment</h3><p>Razorpay integration • delivery-linked settlement</p></div>
+<div class="card"><h3>📩 Notifications</h3><p>Notification service for order/pickup/delivery updates</p></div>
+</div>
+<div class="card" style="margin-top:18px"><h3>System Architecture</h3>
+<div class="flow"><span>Farmer / Buyer / Supplier</span><b class="arrow">→</b><span>Android App</span><b class="arrow">→</b><span>FastAPI</span><b class="arrow">→</b><span>MongoDB Atlas</span></div>
+<div class="flow"><span>FastAPI</span><b class="arrow">→</b><span>AI Price Engine</span><b class="arrow">→</b><span>Agmarknet</span></div>
+<div class="flow"><span>Order</span><b class="arrow">→</b><span>Google Distance Matrix + OR-Tools</span><b class="arrow">→</b><span>Supplier</span></div>
+<div class="flow"><span>Delivery Confirmation</span><b class="arrow">→</b><span>Razorpay</span><b class="arrow">→</b><span>Settlement</span></div>
+</div>
+</section>
+</main>
+<script>
+function show(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('nav button').forEach(x=>x.classList.remove('active'));btn.classList.add('active')}
+function addListing(){let c=document.getElementById('crop').value||'Crop';document.getElementById('listingMsg').innerHTML='<div class="alert success">✓ '+c+' listing published successfully.</div>';document.getElementById('cropCount').textContent='7'}
+function placeOrder(c){document.getElementById('buyerMsg').innerHTML='<div class="alert success">✓ '+c+' order placed. Supplier matching started.</div>';document.getElementById('orderCount').textContent='4'}
+function acceptPickup(){document.getElementById('supplierMsg').innerHTML='<div class="alert success">✓ Pickup accepted. Route navigation started.</div>'}
+let s=0;function advanceOrder(){s++;if(s==1){document.getElementById('transit').textContent='✓ In Transit';document.getElementById('orderMsg').innerHTML='<div class="alert">GPS tracking active.</div>'}else if(s==2){document.getElementById('del').textContent='✓ Delivered';document.getElementById('orderMsg').innerHTML='<div class="alert success">✓ Delivery confirmed with proof.</div>'}else{document.getElementById('pay').textContent='✓ Settled';document.getElementById('orderMsg').innerHTML='<div class="alert success">✓ Payment settlement completed.</div>'}}
+</script>
+</body>
+</html>
